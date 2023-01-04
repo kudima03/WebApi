@@ -12,9 +12,9 @@ namespace WebAPI.Controllers
     {
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<BookCard>), (int)HttpStatusCode.OK)]
-        public async Task<List<BookCard>> Get()
+        public List<BookCard> Get()
         {
-            return await FileManager.ReadAllAsync();
+            return FileManager.ReadAllAsync();
         }
 
         [HttpPost]
