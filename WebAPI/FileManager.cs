@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -12,113 +13,62 @@ namespace WebAPI
     {
         public static string FileName { get; set; }
 
-        private static async Task<bool> SaveAllAsync(List<BookCard> bookCards)
+        private static async Task SaveAllAsync(List<BookCard> bookCards)
         {
             try
             {
-                using (FileStream fs = new FileStream(FileName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true))
-                {
-                    fs.SetLength(0);
-                    await JsonSerializer.SerializeAsync(fs, bookCards);
-                }
-                return true;
+                await File.WriteAllTextAsync(FileName, JsonSerializer.Serialize(bookCards));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Console.WriteLine("An error while writing to the file has occured");
-                return false;
+                Console.WriteLine("An error while writing to the file has occured " + ex.Message);
+                throw ex;
             }
         }
 
-        public static async Task<bool> CreateAsync(BookCard bookCard)
+        public static async Task CreateAsync(BookCard bookCard)
         {
             var buffer = await ReadAllAsync();
-            bookCard.Id = buffer.Count + 1;
+            bookCard.Id = buffer.Max((item) => item.Id) + 1;
             buffer.Add(bookCard);
-            return await SaveAllAsync(buffer);
+            await SaveAllAsync(buffer);
         }
 
         public static async Task<List<BookCard>> ReadAllAsync()
         {
             try
             {
-                List<BookCard> list = null;
-                var sb = new StringBuilder();
-                using (FileStream fs = new FileStream(FileName, FileMode.OpenOrCreate, FileAccess.Read, FileShare.None, bufferSize: 4096, useAsync: true))
-                {
-                    byte[] buffer = new byte[4096];
-                    int numRead;
-                    while ((numRead = await fs.ReadAsync(buffer, 0, buffer.Length)) != 0)
-                    {
-                        string text = Encoding.UTF8.GetString(buffer, 0, numRead);
-                        sb.Append(text);
-                    }
-                }
-                list = JsonSerializer.Deserialize<List<BookCard>>(sb.ToString());
-                return list;
+                return JsonSerializer.Deserialize<List<BookCard>>(await File.ReadAllTextAsync(FileName));
             }
-            catch (System.Text.Json.JsonException ex)
+            catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                return new List<BookCard>();
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("An error while reading from the file has occured");
-                return new List<BookCard>();
+                Console.WriteLine("An error while reading from the file has occured " + ex.Message);
+                throw ex;
             }
         }
 
-        public static async Task<bool> UpdateAsync(BookCard newVersion)
+        public static async Task UpdateAsync(BookCard newVersion)
         {
             var buffer = await ReadAllAsync();
             var oldVersionIndex = buffer.FindIndex(obj => obj.Id == newVersion.Id);
-            if (oldVersionIndex != -1)
-            {
-                buffer[oldVersionIndex] = newVersion;
-                return await SaveAllAsync(buffer);
-            }
-            else
-            {
-                return false;
-            }
-
+            buffer[oldVersionIndex] = newVersion ?? throw new InvalidDataException();
+            await SaveAllAsync(buffer);
         }
 
-        public static async Task<bool> DeleteAsync(int bookCardId)
+        public static async Task DeleteAsync(int bookCardId)
         {
             var cards = await ReadAllAsync();
             var objToDelete = cards.Find(obj => obj.Id == bookCardId);
-            if (objToDelete != null)
-            {
-                cards.Remove(objToDelete);
-                await SaveAllAsync(cards);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-
+            cards.Remove(objToDelete ?? throw new InvalidDataException());
+            await SaveAllAsync(cards);
         }
 
-        public static async Task<bool> DeleteRangeAsync(int[] idArray)
+        public static async Task DeleteRangeAsync(int[] idArray)
         {
             var cards = await ReadAllAsync();
-            foreach (var bookCardId in idArray)
-            {
-                var objToDelete = cards.Find(obj => obj.Id == bookCardId);
-                if (objToDelete != null)
-                {
-                    cards.Remove(objToDelete);
-                }
-                else
-                {
-                    return false;
-                }
-            }
+            var deletedAmount = cards.RemoveAll((item) => idArray.Contains(item.Id));
+            if (deletedAmount == 0) throw new InvalidDataException();
             await SaveAllAsync(cards);
-            return true;
         }
     }
 }
