@@ -15,7 +15,6 @@ namespace WebAPI
         {
             set
             {
-                FileInfo fileInfo = new FileInfo(value);
                 var fileStream = File.Open(value, FileMode.OpenOrCreate);
                 _fileStreamReader = new StreamReader(fileStream);
                 _fileStreamWriter = new StreamWriter(fileStream);
