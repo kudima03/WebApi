@@ -1,6 +1,7 @@
 ﻿using CommonEntities;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace WebAPI.Controllers
@@ -10,42 +11,63 @@ namespace WebAPI.Controllers
     public class BooksController : ControllerBase
     {
         [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<BookCard>), (int)HttpStatusCode.OK)]
         public async Task<List<BookCard>> Get()
         {
             return await FileManager.ReadAllAsync();
         }
 
         [HttpPost]
-        public async Task<ActionResult<BookCard>> Post([FromBody]BookCard bookCard)
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> Post([FromBody]BookCard bookCard)
         {
-            if (bookCard == null)
+            if (bookCard == null) return BadRequest("Input parameter can't be null");
+            try
             {
-                return BadRequest();
+                await FileManager.CreateAsync(bookCard);
+                return Ok();
             }
-            var res = await FileManager.CreateAsync(bookCard);
-            return Ok(res);
+            catch (System.Exception)
+            {
+                return NoContent();
+            }
         }
 
         [HttpPut]
-        public async Task<ActionResult<BookCard>> Put([FromBody]BookCard bookCard)
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> Put([FromBody]BookCard bookCard)
         {
-            if (bookCard == null)
+            if (bookCard == null) return BadRequest();
+            try
+            {
+                await FileManager.UpdateAsync(bookCard);
+                return Ok();
+            }
+            catch (System.IO.InvalidDataException)
             {
                 return BadRequest();
             }
-            var res = await FileManager.UpdateAsync(bookCard);
-            return Ok(res);
+
         }
 
         [HttpDelete]
-        public async Task<ActionResult<BookCard>> Delete([FromBody]int[] idArray)
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> Delete([FromBody]int[] idArray)
         {
-            var res = await FileManager.DeleteRangeAsync(idArray);
-            if (!res)
+            if (idArray == null) return BadRequest("Input parameter can't be null");
+            try
             {
-                return NotFound();
+                await FileManager.DeleteRangeAsync(idArray);
+                return Ok();
             }
-            return Ok(res);
+            catch (System.IO.InvalidDataException)
+            {
+                return BadRequest("No one id was found");
+            }
         }
     }
 }
