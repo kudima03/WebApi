@@ -1,4 +1,4 @@
-﻿namespace CommonEntities
+﻿namespace WebAPI.Models
 {
     public class BookCard
     {
