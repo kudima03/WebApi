@@ -41,12 +41,13 @@ namespace WebAPI.Data.Implementations
             }
         }
 
-        public async Task CreateAsync(BookCard bookCard)
+        public async Task<int> CreateAsync(BookCard bookCard)
         {
             var buffer = (await GetAllAsync()).ToList();
-            bookCard.Id = buffer.Max((item) => item.Id) + 1;
+            var id = bookCard.Id = buffer.Max((item) => item.Id) + 1;
             buffer.Add(bookCard);
             await SaveAllAsync(buffer);
+            return id;
         }
 
         public async Task UpdateAsync(BookCard bookCard)

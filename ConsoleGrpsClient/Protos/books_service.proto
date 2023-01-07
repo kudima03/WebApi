@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+option csharp_namespace = "WebAPI";
+
+package webApi;
+
+service Books {
+  rpc GetAllBooks (BooksGetRequest) returns (stream Book);
+  rpc CreateBook (BookCreationRequest) returns (BookCreationReply);
+  rpc EditBook (BookEditRequest) returns (BookEditReply);
+  rpc DeleteBook (BookDeleteRequest) returns (BookDeleteReply);
+}
+
+message BooksGetRequest{
+	int32 limit = 1;
+}
+
+message BookCreationRequest {
+	Book bookToCreate = 1;
+}
+
+message BookCreationReply {
+	int32 id = 1;
+	Status status = 2;
+}
+
+message BookEditRequest {
+	Book bookNewVersion = 1;
+}
+
+message BookEditReply {
+	Status status = 1;
+}
+
+message BookDeleteRequest {
+	repeated int32 id = 1;
+}
+
+message BookDeleteReply {
+	Status status = 1;
+}
+
+message Book{
+	int32 id = 1;
+	string name = 2;
+	bytes binaryPhoto = 3;
+}
+
+enum Status{
+	SUCCESSFULLY = 0;
+	DATA_NOT_FOUND = 1;
+	ERROR = 2;
+}

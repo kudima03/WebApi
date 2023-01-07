@@ -9,7 +9,7 @@ namespace WebAPI.Data.Interfaces
     {
         Task SaveAllAsync(IEnumerable<BookCard> bookCards);       
 
-        Task CreateAsync(BookCard bookCard);
+        Task<int> CreateAsync(BookCard bookCard);
 
         Task UpdateAsync(BookCard bookCard);
 

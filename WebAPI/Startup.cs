@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using WebAPI.Data.Implementations;
 using WebAPI.Data.Interfaces;
+using WebAPI.Grpc;
 
 namespace WebAPI
 {
@@ -22,6 +23,11 @@ namespace WebAPI
         {
             services.AddScoped<IBooksRepository, BooksFileRepository>();
             services.AddControllers();
+            services.AddGrpc(config=>
+            {
+                config.MaxReceiveMessageSize = null;
+            }
+            );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -41,6 +47,11 @@ namespace WebAPI
             app.UseEndpoints(endpoints =>
             {
                endpoints.MapControllers();
+                app.UseEndpoints(endpoints => {
+                    endpoints.MapControllers();
+                    endpoints
+                        .MapGrpcService<BooksService>();
+                });
             });
         }
     }
