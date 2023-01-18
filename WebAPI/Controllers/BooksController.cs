@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using BooksAPI.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using WebAPI.Data.Implementations;
-using WebAPI.Data.Interfaces;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers
@@ -13,18 +14,18 @@ namespace WebAPI.Controllers
     public class BooksController : ControllerBase
     {
 
-        private readonly IBooksRepository _booksRepository;
+        private readonly BooksContext _booksContext;
 
-        public BooksController(IBooksRepository booksRepository)
+        public BooksController(BooksContext booksRepository)
         {
-            _booksRepository = booksRepository;
+            _booksContext = booksRepository;
         }
 
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<BookCard>), (int)HttpStatusCode.OK)]
         public async Task<IEnumerable<BookCard>> Get()
         {
-            return await _booksRepository.GetAllAsync();
+            return await _booksContext.BookCards.ToListAsync();
         }
 
         [HttpPost]
@@ -36,7 +37,8 @@ namespace WebAPI.Controllers
             if (bookCard == null) return BadRequest("Input parameter can't be null");
             try
             {
-                await _booksRepository.CreateAsync(bookCard);
+                await _booksContext.BookCards.AddAsync(bookCard);
+                await _booksContext.SaveChangesAsync();
                 return Ok();
             }
             catch (System.Exception)
@@ -53,7 +55,8 @@ namespace WebAPI.Controllers
             if (bookCard == null) return BadRequest();
             try
             {
-                await _booksRepository.UpdateAsync(bookCard);
+                _booksContext.BookCards.Update(bookCard);
+                await _booksContext.SaveChangesAsync();
                 return Ok();
             }
             catch (System.IO.InvalidDataException)
@@ -71,7 +74,11 @@ namespace WebAPI.Controllers
             if (idArray == null) return BadRequest("Input parameter can't be null");
             try
             {
-                await _booksRepository.DeleteRangeAsync(idArray);
+                var entitiesToDelete = from item in _booksContext.BookCards
+                                       where idArray.Contains(item.Id)
+                                       select item;
+                _booksContext.BookCards.RemoveRange(entitiesToDelete);
+                await _booksContext.SaveChangesAsync();
                 return Ok();
             }
             catch (System.IO.InvalidDataException)

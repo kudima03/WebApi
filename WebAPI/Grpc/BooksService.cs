@@ -1,23 +1,25 @@
-﻿using Google.Protobuf;
+﻿using BooksAPI.Infrastructure;
+using Google.Protobuf;
 using Grpc.Core;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using WebAPI;
-using WebAPI.Data.Interfaces;
+using WebAPI.Models;
 
 namespace WebAPI.Grpc
 {
     public class BooksService : Books.BooksBase
     {
-        private readonly IBooksRepository _booksRepository;
+        private readonly BooksContext _booksContext;
 
         private readonly ILogger<BooksService> _logger;
 
-        public BooksService(IBooksRepository booksRepository, ILogger<BooksService> logger)
+        public BooksService(BooksContext booksRepository, ILogger<BooksService> logger)
         {
-            _booksRepository = booksRepository;
+            _booksContext = booksRepository;
             _logger = logger;
         }
 
@@ -25,12 +27,13 @@ namespace WebAPI.Grpc
         {
             try
             {
-                var id = await _booksRepository.CreateAsync(new Models.BookCard()
+                var entity = await _booksContext.BookCards.AddAsync(new BookCard()
                 {
                     Name = request.BookToCreate.Name,
                     BinaryPhoto = request.BookToCreate.BinaryPhoto.ToByteArray(),
                 });
-                return new BookCreationReply() { Id = id, Status = Status.Successfully };
+                await _booksContext.SaveChangesAsync();
+                return new BookCreationReply() { Id = entity.Entity.Id, Status = Status.Successfully };
             }
             catch (System.Exception)
             {
@@ -42,12 +45,13 @@ namespace WebAPI.Grpc
         {
             try
             {
-                await _booksRepository.UpdateAsync(new Models.BookCard
+                _booksContext.BookCards.Update(new BookCard
                 {
                     Id = request.BookNewVersion.Id,
                     Name = request.BookNewVersion.Name,
                     BinaryPhoto = request.BookNewVersion.BinaryPhoto.ToByteArray(),
                 });
+                await _booksContext.SaveChangesAsync();
                 return new BookEditReply() { Status = Status.Successfully };
             }
             catch (InvalidDataException)
@@ -65,14 +69,11 @@ namespace WebAPI.Grpc
             if (request.Id.Count == 0) return new BookDeleteReply() { Status = Status.DataNotFound };
             try
             {
-                if (request.Id.Count == 1)
-                {
-                    await _booksRepository.DeleteAsync(request.Id.First());
-                }
-                else
-                {
-                    await _booksRepository.DeleteRangeAsync(request.Id.ToArray());
-                }
+                var entitiesToDelete = from item in _booksContext.BookCards
+                                       where request.Id.Contains(item.Id)
+                                       select item;
+                _booksContext.BookCards.RemoveRange(entitiesToDelete);
+                await _booksContext.SaveChangesAsync();
                 return new BookDeleteReply() { Status = Status.Successfully };
             }
             catch (InvalidDataException)
@@ -87,7 +88,7 @@ namespace WebAPI.Grpc
 
         public override async Task GetAllBooks(BooksGetRequest request, IServerStreamWriter<Book> responseStream, ServerCallContext context)
         {
-            foreach (var book in (await _booksRepository.GetAllAsync()).Take(request.Limit))
+            await foreach (var book in  _booksContext.BookCards.Take(request.Limit).AsAsyncEnumerable())
             {
                 await responseStream.WriteAsync(new Book() { Id = book.Id, BinaryPhoto = ByteString.CopyFrom(book.BinaryPhoto), Name = book.Name});
             }

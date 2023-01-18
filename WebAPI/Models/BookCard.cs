@@ -4,13 +4,15 @@
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public string Author { get; set; }
         public byte[] BinaryPhoto { get; set; }
+
         public BookCard()
         {
-            Name = "placeholder";
-            BinaryPhoto = new byte[1];
+
         }
-        public BookCard(string name, byte[] binaryPhoto) : this()
+
+        public BookCard(string name, byte[] binaryPhoto)
         {
             Name = name;
             BinaryPhoto = BinaryPhoto;
