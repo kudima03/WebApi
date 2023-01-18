@@ -32,7 +32,8 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="300"></DataGridTextColumn>
+                <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="150"></DataGridTextColumn>
+                <DataGridTextColumn Header="Автор" Binding="{Binding Author}" Width="150"></DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>
         <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Vertical" Width="190" Height="390">

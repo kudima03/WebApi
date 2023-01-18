@@ -17,7 +17,7 @@ namespace WebAPIUserApp
         static ConnectionModule()
         {
             client = new HttpClient();
-            client.BaseAddress = new Uri(ConfigurationManager.AppSettings.Get("serverUri"));
+            client.BaseAddress = new Uri(ConfigurationManager.AppSettings.Get("ServerUrl"));
             client.Timeout = TimeSpan.FromSeconds(10);
             client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
