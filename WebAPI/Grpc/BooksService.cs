@@ -27,7 +27,7 @@ namespace WebAPI.Grpc
         {
             try
             {
-                var entity = await _booksContext.BookCards.AddAsync(new BookCard()
+                var entity = await _booksContext.BookCards.AddAsync(new Models.BookCard()
                 {
                     Name = request.BookToCreate.Name,
                     BinaryPhoto = request.BookToCreate.BinaryPhoto.ToByteArray(),
@@ -45,7 +45,7 @@ namespace WebAPI.Grpc
         {
             try
             {
-                _booksContext.BookCards.Update(new BookCard
+                _booksContext.BookCards.Update(new Models.BookCard
                 {
                     Id = request.BookNewVersion.Id,
                     Name = request.BookNewVersion.Name,

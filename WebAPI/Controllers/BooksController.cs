@@ -1,19 +1,19 @@
 ﻿using BooksAPI.Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using WebAPI.Models;
 
 namespace WebAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class BooksController : ControllerBase
     {
-
         private readonly BooksContext _booksContext;
 
         public BooksController(BooksContext booksRepository)
@@ -22,17 +22,17 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<BookCard>), (int)HttpStatusCode.OK)]
-        public async Task<IEnumerable<BookCard>> Get()
+        [ProducesResponseType(typeof(IEnumerable<Models.BookCard>), (int)HttpStatusCode.OK)]
+        public async Task<IEnumerable<Models.BookCard>> Get()
         {
-            return await _booksContext.BookCards.ToListAsync();
+            return await _booksContext.BookCards.AsNoTracking().ToListAsync();
         }
 
         [HttpPost]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Post([FromBody] BookCard bookCard)
+        public async Task<IActionResult> Post([FromBody] Models.BookCard bookCard)
         {
             if (bookCard == null) return BadRequest("Input parameter can't be null");
             try
@@ -50,7 +50,7 @@ namespace WebAPI.Controllers
         [HttpPut]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Put([FromBody] BookCard bookCard)
+        public async Task<IActionResult> Put([FromBody] Models.BookCard bookCard)
         {
             if (bookCard == null) return BadRequest();
             try
