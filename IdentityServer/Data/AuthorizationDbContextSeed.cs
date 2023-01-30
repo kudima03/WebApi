@@ -33,20 +33,15 @@ namespace IdentityServer.Data
         {
             var user = new ApplicationUser()
             {
-                CardHolderName = "Cardholder",
-                CardNumber = "4017111111111881",
-                CardType = 1,
                 City = "Minsk",
                 Country = "Belarus",
                 Email = "demouser@gmail.com",
-                Expiration = "12/25",
                 Id = Guid.NewGuid().ToString(),
                 LastName = "LastName",
                 Name = "User",
                 PhoneNumber = "1234567890",
                 UserName = "demouser@gmail.com",
                 Street = "Central st.",
-                SecurityNumber = "535",
                 NormalizedEmail = "DEMOUSER@GMAIL.COM",
                 NormalizedUserName = "DEMOUSER@GMAIL.COM",
                 SecurityStamp = Guid.NewGuid().ToString("D"),
