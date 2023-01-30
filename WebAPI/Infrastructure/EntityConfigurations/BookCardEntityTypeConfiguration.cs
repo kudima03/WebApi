@@ -5,11 +5,11 @@ using WebAPI.Models;
 namespace WebAPI.Infrastructure.EntityConfigurations
 {
     public class BookCardEntityTypeConfiguration
-        : IEntityTypeConfiguration<BookCard>
+        : IEntityTypeConfiguration<Models.BookCard>
     {
-        public void Configure(EntityTypeBuilder<BookCard> builder)
+        public void Configure(EntityTypeBuilder<Models.BookCard> builder)
         {
-            builder.ToTable(nameof(BookCard));
+            builder.ToTable(nameof(Models.BookCard));
 
             builder.HasKey(x => x.Id);
 
