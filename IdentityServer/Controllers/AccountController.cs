@@ -39,7 +39,6 @@ namespace IdentityServer.Controllers
         }
 
         [HttpGet]
-        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string returnUrl)
         {
             var authorizationContext = await _interaction.GetAuthorizationContextAsync(returnUrl);
@@ -75,14 +74,12 @@ namespace IdentityServer.Controllers
                 ModelState.AddModelError("", "Invalid username or password.");
             }
 
-            // something went wrong, show form with error
             var vm = await BuildLoginViewModel(model);
 
             ViewData["ReturnUrl"] = model.ReturnUrl;
 
             return View(vm);
         }
-
 
         private LoginViewModel BuildLoginViewModel(string returnUrl, AuthorizationRequest authorizationContext)
         {
@@ -101,5 +98,61 @@ namespace IdentityServer.Controllers
             return vm;
         }
 
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Register(string returnUrl = null)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            if (ModelState.IsValid)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    City = model.User.City,
+                    Country = model.User.Country,
+                    LastName = model.User.LastName,
+                    Name = model.User.Name,
+                    Street = model.User.Street,
+                    PhoneNumber = model.User.PhoneNumber,
+                };
+                var result = await _userManager.CreateAsync(user, model.Password);
+                if (result.Errors.Count() > 0)
+                {
+                    AddErrors(result);
+                    return View(model);
+                }
+            }
+
+            if (returnUrl != null)
+            {
+                if (HttpContext.User.Identity.IsAuthenticated)
+                    return Redirect(returnUrl);
+                else
+                    if (ModelState.IsValid)
+                    return RedirectToAction("login", "account", new { returnUrl = returnUrl });
+                else
+                    return View(model);
+            }
+
+            return RedirectToAction("index", "home");
+        }
+
+        private void AddErrors(IdentityResult result)
+        {
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+        }
     }
 }

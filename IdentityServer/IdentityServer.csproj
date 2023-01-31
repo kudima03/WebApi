@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <None Remove="Certificate\idsrv3test.pfx" />
+    <None Remove="Controllers\AccountController.cs~RF198da61.TMP" />
   </ItemGroup>
 
   <ItemGroup>
