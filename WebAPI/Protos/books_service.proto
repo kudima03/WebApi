@@ -16,7 +16,7 @@ message BooksGetRequest{
 }
 
 message BookCreationRequest {
-	Book bookToCreate = 1;
+	CreationBookModel bookToCreate = 1;
 }
 
 message BookCreationReply {
@@ -25,7 +25,7 @@ message BookCreationReply {
 }
 
 message BookEditRequest {
-	Book bookNewVersion = 1;
+	CreationBookModel bookNewVersion = 1;
 }
 
 message BookEditReply {
@@ -40,10 +40,19 @@ message BookDeleteReply {
 	Status status = 1;
 }
 
+message CreationBookModel{
+	string name = 1;
+	string author = 2;
+	string photoExtension = 3;
+	bytes binaryPhoto = 4;
+}
+
 message Book{
 	int32 id = 1;
 	string name = 2;
-	bytes binaryPhoto = 3;
+	string author = 3;
+	string imageFileName =4;
+	string imageUri = 5;
 }
 
 enum Status{

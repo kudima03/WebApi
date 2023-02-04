@@ -1,6 +1,9 @@
-﻿using BooksAPI.Infrastructure;
+﻿using BooksAPI.Controllers;
+using BooksAPI.ImageInfrastructure;
+using BooksAPI.Infrastructure;
 using Google.Protobuf;
 using Grpc.Core;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.IO;
@@ -15,25 +18,41 @@ namespace WebAPI.Grpc
     {
         private readonly BooksContext _booksContext;
 
+        private readonly ImageManager _imageManager;
+
+        private readonly IWebHostEnvironment _webHostEnvironment;
+
         private readonly ILogger<BooksService> _logger;
 
-        public BooksService(BooksContext booksRepository, ILogger<BooksService> logger)
+        public BooksService(BooksContext booksRepository,
+                        ImageManager imageManager,
+                        ILogger<BooksService> logger,
+                        IWebHostEnvironment webHostEnvironment)
         {
             _booksContext = booksRepository;
             _logger = logger;
+            _imageManager = imageManager;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public override async Task<BookCreationReply> CreateBook(BookCreationRequest request, ServerCallContext context)
         {
             try
             {
-                var entity = await _booksContext.BookCards.AddAsync(new Models.BookCard()
+                var entityEntry = await _booksContext.BookCards.AddAsync(new BookCard()
                 {
                     Name = request.BookToCreate.Name,
-                    BinaryPhoto = request.BookToCreate.BinaryPhoto.ToByteArray(),
+                    Author = request.BookToCreate.Author,
                 });
+
+                entityEntry.Entity.PictureFileName = await _imageManager.CreateBookImageAsync(
+                                                entityEntry.Entity.Id,
+                                                request.BookToCreate.BinaryPhoto.ToArray(),
+                                                request.BookToCreate.PhotoExtension);
+
+                entityEntry.Entity.PictureUri = _webHostEnvironment.EnvironmentName + $"/Pictures/{entityEntry.Entity.Id}/pic";
                 await _booksContext.SaveChangesAsync();
-                return new BookCreationReply() { Id = entity.Entity.Id, Status = Status.Successfully };
+                return new BookCreationReply() { Id = entityEntry.Entity.Id, Status = Status.Successfully };
             }
             catch (System.Exception)
             {
@@ -45,12 +64,18 @@ namespace WebAPI.Grpc
         {
             try
             {
-                _booksContext.BookCards.Update(new Models.BookCard
+                var entityEntry = _booksContext.BookCards.Update(new BookCard()
                 {
-                    Id = request.BookNewVersion.Id,
                     Name = request.BookNewVersion.Name,
-                    BinaryPhoto = request.BookNewVersion.BinaryPhoto.ToByteArray(),
+                    Author = request.BookNewVersion.Author,
                 });
+
+                await _imageManager.UpdateBookImageAsync(
+                                                entityEntry.Entity.Id,
+                                                request.BookNewVersion.BinaryPhoto.ToArray(),
+                                                request.BookNewVersion.PhotoExtension);
+
+                entityEntry.Entity.PictureUri = _webHostEnvironment.EnvironmentName + $"/Pictures/{entityEntry.Entity.Id}/pic";
                 await _booksContext.SaveChangesAsync();
                 return new BookEditReply() { Status = Status.Successfully };
             }
@@ -72,6 +97,7 @@ namespace WebAPI.Grpc
                 var entitiesToDelete = from item in _booksContext.BookCards
                                        where request.Id.Contains(item.Id)
                                        select item;
+                entitiesToDelete.AsParallel().ForAll(x => _imageManager.DeleteBookImage(x.Id));
                 _booksContext.BookCards.RemoveRange(entitiesToDelete);
                 await _booksContext.SaveChangesAsync();
                 return new BookDeleteReply() { Status = Status.Successfully };
@@ -88,9 +114,17 @@ namespace WebAPI.Grpc
 
         public override async Task GetAllBooks(BooksGetRequest request, IServerStreamWriter<Book> responseStream, ServerCallContext context)
         {
-            await foreach (var book in  _booksContext.BookCards.Take(request.Limit).AsAsyncEnumerable())
+            await foreach (var book in _booksContext.BookCards.Take(request.Limit).AsAsyncEnumerable())
             {
-                await responseStream.WriteAsync(new Book() { Id = book.Id, BinaryPhoto = ByteString.CopyFrom(book.BinaryPhoto), Name = book.Name});
+                var bookBuf = new Book()
+                {
+                    Id = book.Id,
+                    Name = book.Name,
+                    Author = book.Author,
+                    ImageFileName = book.PictureFileName,
+                    ImageUri = book.PictureUri
+                };
+                await responseStream.WriteAsync(bookBuf);
             }
         }
     }

@@ -5,22 +5,24 @@ using WebAPI.Models;
 namespace WebAPI.Infrastructure.EntityConfigurations
 {
     public class BookCardEntityTypeConfiguration
-        : IEntityTypeConfiguration<Models.BookCard>
+        : IEntityTypeConfiguration<BookCard>
     {
-        public void Configure(EntityTypeBuilder<Models.BookCard> builder)
+        public void Configure(EntityTypeBuilder<BookCard> builder)
         {
-            builder.ToTable(nameof(Models.BookCard));
+            builder.ToTable(nameof(BookCard));
 
             builder.HasKey(x => x.Id);
 
             builder.Property(x => x.Name)
                 .IsRequired();
 
-            builder.Property(x=>x.Author)
+            builder.Property(x => x.Author)
                 .IsRequired();
 
-            builder.Property(x => x.BinaryPhoto)
+            builder.Property(x => x.PictureFileName)
                 .IsRequired(false);
+
+            builder.Ignore(x => x.PictureUri);
         }
     }
 }
