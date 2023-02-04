@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebMvcClient.Services;
+using Microsoft.AspNetCore.Authentication;
 
 namespace WebMvcClient.Controllers
 {
@@ -20,6 +21,7 @@ namespace WebMvcClient.Controllers
 
         public async Task<IActionResult> Index()
         {
+            var a = await HttpContext.GetTokenAsync("access_token");
             var books = await _booksHttpClient.GetBooksAsync();
             return Ok();
         }

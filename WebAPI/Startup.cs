@@ -1,3 +1,4 @@
+using BooksAPI.ImageInfrastructure;
 using BooksAPI.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -27,6 +28,7 @@ namespace WebAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddSingleton<ImageManager>();
             ConfigureAuthService(services);
             services.AddGrpc(config =>
             {
@@ -49,8 +51,12 @@ namespace WebAPI
 
             app.UseRouting();
 
+            app.UseStaticFiles();
+
             app.UseAuthentication();
+
             app.UseAuthorization();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

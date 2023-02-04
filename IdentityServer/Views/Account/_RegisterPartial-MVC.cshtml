@@ -1,0 +1,139 @@
+﻿@model IdentityServer.ViewModels.RegisterViewModel
+
+<div class="container register-container">
+    <div class="row">
+        <form asp-controller="Account" asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal">
+            <ul class="buttons">
+                <li class="active"><button>Register</button></li>
+                <li><button asp-area="" asp-controller="Account" asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]">LOGIN</button></li>
+            </ul>
+            <h4 class="order-create-section-title">CREATE NEW ACCOUNT</h4>
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            <div class="form-group col-sm-6">
+                <label asp-for="User.Name" class="control-label form-label">NAME</label>
+                <input asp-for="User.Name" class="form-control form-input" />
+                <span asp-validation-for="User.Name" class="text-danger" />
+            </div>
+            <div class="form-group col-sm-6">
+                <label asp-for="User.LastName" class="control-label form-label">LAST NAME</label>
+                <input asp-for="User.LastName" class="form-control form-input" />
+                <span asp-validation-for="User.LastName" class="text-danger" />
+            </div>
+            <div class="form-group col-sm-6">
+                <label asp-for="User.Street" class="control-label form-label">ADDRESS</label>
+                <input asp-for="User.Street" class="form-control form-input" />
+                <span asp-validation-for="User.Street" class="text-danger" />
+            </div>
+            <div class="form-group col-sm-6">
+                <label asp-for="User.City" class="control-label form-label"></label>
+                <input asp-for="User.City" class="form-control form-input" />
+                <span asp-validation-for="User.City" class="text-danger" />
+            </div>
+            <div class="form-group col-sm-6">
+                <label asp-for="User.Country" class="control-label form-label"></label>
+                <input asp-for="User.Country" class="form-control form-input" />
+                <span asp-validation-for="User.Country" class="text-danger" />
+            </div>
+            <div class="form-group col-sm-6">
+                <label asp-for="User.PhoneNumber" class="control-label form-label">PHONE NUMBER</label>
+                <input asp-for="User.PhoneNumber" class="form-control form-input" />
+                <span asp-validation-for="User.PhoneNumber" class="text-danger" />
+            </div>
+            <div class="row">
+                <div class="form-group col-sm-6">
+                    <label asp-for="Email" class="control-label form-label"></label>
+                    <input asp-for="Email" class="form-control form-input" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="form-group col-sm-offset-6"></div>
+                <div class="form-group col-sm-6">
+                    <label asp-for="Password" class="control-label form-label"></label>
+                    <input asp-for="Password" class="form-control form-input" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label asp-for="ConfirmPassword" class="control-label form-label"></label>
+                    <input asp-for="ConfirmPassword" class="form-control form-input" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-default btn-brand">&nbsp;Register&nbsp;</button>
+            </div>
+        </form>
+    </div>
+</div>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        box-sizing: border-box;
+    }
+
+    ul {
+        list-style-type: none;
+    }
+
+    ster-container {
+        width: 100%;
+    }
+
+    .row {
+        text-align: center;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    h4 {
+        font-size: 25px;
+    }
+
+    .form-group {
+        margin: 15px 0;
+    }
+
+        .form-group label {
+            display: block;
+            min-width: 150px;
+            margin-right: 10px;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+    input {
+        padding: 10px 20px;
+        border: 1px solid #000;
+        outline: none;
+    }
+
+    button {
+        padding: 10px 15px;
+        cursor: pointer;
+        color: #000;
+        font-size: 15px;
+        background-color: #fff;
+        border-radius: 5px;
+        transition: .2s all ease-in-out;
+    }
+
+        button:hover {
+            background-color: #000;
+            color: #fff;
+        }
+
+    .buttons {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+/*    .text-danger {
+        display: none;
+    }*/
+</style>

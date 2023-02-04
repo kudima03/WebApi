@@ -1,0 +1,28 @@
+﻿@model IdentityServer.ViewModels.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Register";
+
+    //var requestQuery = ViewContext.HttpContext.Request.Query;
+
+    //requestQuery.TryGetValue("ReturnUrl", out var returnUrl);
+
+    //string partialView;
+
+    //if (returnUrl[0].Contains("client_id=js"))
+    //{
+    //    Layout = "_Layout-SPA";
+    //    partialView = "_RegisterPartial-SPA.cshtml";
+    //}
+    //else
+    //{
+    //    partialView = ;
+    //}
+
+}
+
+<partial name="_RegisterPartial-MVC.cshtml" model=@Model />
+
+@*@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}*@

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.IO;
 
 namespace WebAPI
 {
@@ -24,6 +25,8 @@ namespace WebAPI
 
         public static IWebHostBuilder CreateHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-            .UseStartup<Startup>();
+            .UseStartup<Startup>()
+            .UseContentRoot(Directory.GetCurrentDirectory())
+            .UseWebRoot("Pictures");
     }
 }

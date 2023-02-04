@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 using WebMvcClient.Infrastructure;
 using WebMvcClient.Models;
 
@@ -21,8 +22,8 @@ namespace WebMvcClient.Services
             var request = new HttpRequestMessage()
             {
                 Method = HttpMethod.Delete,
-                RequestUri = new Uri(URLs.DeleteBookUrl(_booksApiUrl)),
-                Content = new StringContent(JsonSerializer.Serialize(books.Select(x=>x.Id)))
+                RequestUri = new Uri(URLs.Books.DeleteBookUrl(_booksApiUrl)),
+                Content = new StringContent(JsonSerializer.Serialize(books.Select(x=>x.Id)), Encoding.UTF8, "application/json"),
             };
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
@@ -33,7 +34,7 @@ namespace WebMvcClient.Services
             var request = new HttpRequestMessage()
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri(URLs.GetAllBooksUrl(_booksApiUrl)),
+                RequestUri = new Uri(URLs.Books.GetAllBooksUrl(_booksApiUrl)),
             };
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
@@ -49,8 +50,8 @@ namespace WebMvcClient.Services
             var request = new HttpRequestMessage()
             {
                 Method = HttpMethod.Post,
-                RequestUri = new Uri(URLs.PostBookUrl(_booksApiUrl)),
-                Content = new StringContent(JsonSerializer.Serialize(book))
+                RequestUri = new Uri(URLs.Books.PostBookUrl(_booksApiUrl)),
+                Content = new StringContent(JsonSerializer.Serialize(book), Encoding.UTF8, "application/json"),
             };
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
@@ -61,8 +62,8 @@ namespace WebMvcClient.Services
             var request = new HttpRequestMessage()
             {
                 Method = HttpMethod.Put,
-                RequestUri = new Uri(URLs.UpdateBookUrl(_booksApiUrl)),
-                Content = new StringContent(JsonSerializer.Serialize(book))
+                RequestUri = new Uri(URLs.Books.UpdateBookUrl(_booksApiUrl)),
+                Content = new StringContent(JsonSerializer.Serialize(book), Encoding.UTF8, "application/json")
             };
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
