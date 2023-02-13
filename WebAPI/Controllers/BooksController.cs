@@ -34,7 +34,7 @@ namespace WebAPI.Controllers
             var books = await _booksContext.BookCards.AsNoTracking().ToArrayAsync();
             foreach (var book in books)
             {
-                book.PictureUri = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/Pictures/?bookId={book.Id}";
+                book.PictureUri = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/Pictures/GetBookImage/?bookId={book.Id}";
             }
             return books;
         }
@@ -45,7 +45,7 @@ namespace WebAPI.Controllers
         public async Task<Models.BookCard> GetById([FromQuery] int bookId)
         {
             var book = await _booksContext.BookCards.AsNoTracking().SingleOrDefaultAsync(x => x.Id == bookId);
-            book.PictureUri = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/Pictures/?bookId={book.Id}";
+            book.PictureUri = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/Pictures/GetBookImage/?bookId={book.Id}";
             return book;
         }
 

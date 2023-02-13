@@ -2,9 +2,7 @@
 using BooksAPI.Infrastructure;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,19 +17,10 @@ namespace WebAPI.Grpc
 
         private readonly ImageManager _imageManager;
 
-        private readonly IWebHostEnvironment _webHostEnvironment;
-
-        private readonly ILogger<BooksService> _logger;
-
-        public BooksService(BooksContext booksRepository,
-                        ImageManager imageManager,
-                        ILogger<BooksService> logger,
-                        IWebHostEnvironment webHostEnvironment)
+        public BooksService(BooksContext booksRepository, ImageManager imageManager)
         {
             _booksContext = booksRepository;
-            _logger = logger;
             _imageManager = imageManager;
-            _webHostEnvironment = webHostEnvironment;
         }
 
         public override async Task<BookCreationReply> CreateBook(BookCreationRequest request, ServerCallContext context)
@@ -44,12 +33,13 @@ namespace WebAPI.Grpc
                     Author = request.BookToCreate.Author,
                 });
 
-                entityEntry.Entity.PictureFileName = await _imageManager.CreateBookImageAsync(
-                                                entityEntry.Entity.Id,
-                                                request.BookToCreate.BinaryPhoto.ToArray(),
-                                                request.BookToCreate.PhotoExtension);
-
-                entityEntry.Entity.PictureUri = _webHostEnvironment.EnvironmentName + $"/Pictures/{entityEntry.Entity.Id}/pic";
+                if (request.BookToCreate.PhotoExtension != string.Empty && !request.BookToCreate.BinaryPhoto.IsEmpty)
+                {
+                    entityEntry.Entity.PictureFileName = await _imageManager.CreateBookImageAsync(
+                                entityEntry.Entity.Id,
+                                request.BookToCreate.BinaryPhoto.ToArray(),
+                                request.BookToCreate.PhotoExtension);
+                }
                 await _booksContext.SaveChangesAsync();
                 return new BookCreationReply() { Id = entityEntry.Entity.Id, Status = Status.Successfully };
             }
@@ -69,12 +59,11 @@ namespace WebAPI.Grpc
                     Author = request.BookNewVersion.Author,
                 });
 
-                await _imageManager.UpdateBookImageAsync(
+                entityEntry.Entity.PictureFileName = await _imageManager.UpdateBookImageAsync(
                                                 entityEntry.Entity.Id,
                                                 request.BookNewVersion.BinaryPhoto.ToArray(),
                                                 request.BookNewVersion.PhotoExtension);
 
-                entityEntry.Entity.PictureUri = _webHostEnvironment.EnvironmentName + $"/Pictures/{entityEntry.Entity.Id}/pic";
                 await _booksContext.SaveChangesAsync();
                 return new BookEditReply() { Status = Status.Successfully };
             }
@@ -115,13 +104,13 @@ namespace WebAPI.Grpc
         {
             await foreach (var book in _booksContext.BookCards.Take(request.Limit).AsAsyncEnumerable())
             {
-                book.PictureUri = $"https://{context.Host}/Pictures/?bookId={book.Id}";
+                book.PictureUri = $"https://{context.Host}/Pictures/GetBookImage/?bookId={book.Id}";
                 var bookBuf = new Book()
                 {
                     Id = book.Id,
                     Name = book.Name,
                     Author = book.Author,
-                    ImageFileName = book.PictureFileName,
+                    ImageFileName = book.PictureFileName ?? "",
                     ImageUri = book.PictureUri
                 };
                 await responseStream.WriteAsync(bookBuf);
