@@ -1,19 +1,18 @@
-﻿using BooksAPI.Controllers;
-using BooksAPI.ImageInfrastructure;
+﻿using BooksAPI.ImageInfrastructure;
 using BooksAPI.Infrastructure;
-using Google.Protobuf;
 using Grpc.Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using WebAPI.Models;
 
 namespace WebAPI.Grpc
 {
+    [Authorize]
     public class BooksService : Books.BooksBase
     {
         private readonly BooksContext _booksContext;
@@ -116,6 +115,7 @@ namespace WebAPI.Grpc
         {
             await foreach (var book in _booksContext.BookCards.Take(request.Limit).AsAsyncEnumerable())
             {
+                book.PictureUri = $"https://{context.Host}/Pictures/?bookId={book.Id}";
                 var bookBuf = new Book()
                 {
                     Id = book.Id,
